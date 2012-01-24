@@ -14,7 +14,7 @@ from tempfile import tempdir
 
 from mmstats.reader import MmStatsReader
 
-from porkchop.plugin import PorkchopPlugin, PorkchopPluginHandler
+from porkchop.plugin import PorkchopPlugin, PorkchopPluginHandler, test_plugin_data
 from porkchop.util import parse_config
 
 
@@ -42,7 +42,4 @@ class MmsPlugin(PorkchopPlugin):
         return stats
 
 if __name__ == '__main__':
-    plug = PorkchopPluginHandler('')
-    mms = plug.plugins['mms']()
-    mms.config = parse_config(mms.config_file)
-    print mms.get_data()
+    print test_plugin_data('mms')
