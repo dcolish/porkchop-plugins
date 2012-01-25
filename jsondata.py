@@ -1,3 +1,12 @@
+"""
+To use create a config in your porkchop conf dir called jsondata.ini. In that
+config place the following::
+
+   [jsondata]
+   path = <path to your json file>
+
+"""
+
 import json
 
 from porkchop.plugin import PorkchopPlugin, test_plugin_data
