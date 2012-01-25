@@ -3,14 +3,6 @@ import socket
 from porkchop.plugin import PorkchopPlugin
 
 class MemcachedPlugin(PorkchopPlugin):
-  def _connect(self, host, port):
-    try:
-      sock = socket.socket()
-      sock.connect((host, port))
-    except:
-      raise
-
-    return sock
 
   def get_data(self):
     data = self.gendict()
@@ -23,14 +15,12 @@ class MemcachedPlugin(PorkchopPlugin):
 
     for host, port in instances:
       try:
-        sock = self._connect(host, int(port))
+        with self.tcp_socket(host, int(port)) as sock:
+          sock.send('stats\r\nquit\r\n')
 
-        sock.send('stats\r\nquit\r\n')
+          while not resp_data.endswith('END\r\n'):
+            resp_data += sock.recv(1024)
 
-        while not resp_data.endswith('END\r\n'):
-          resp_data += sock.recv(1024)
-
-        sock.close()
       except socket.error:
         continue
 

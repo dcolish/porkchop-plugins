@@ -30,19 +30,16 @@ class HAProxy(object):
   @classmethod
   def stats(self, sock_path):
     try:
-      sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-      sock.connect(sock_path)
-      sock_data = []
-      data = ''
+      with unix_socket(HAPROXY_SOCKET) as sock:
+        sock_data = []
+        data = ''
+        sock.send('show stat\n')
 
-      sock.send('show stat\n')
-
-      while True:
-        data = sock.recv(1024)
-        if not data: break
-        sock_data.append(data)
-
-      sock.close()
+        while True:
+          data = sock.recv(1024)
+          if not data:
+            break
+          sock_data.append(data)
     except socket.error:
       return []
 

@@ -1,16 +1,9 @@
 import socket
 
-from porkchop.plugin import PorkchopPlugin
+from porkchop.plugin import PorkchopPlugin, test_plugin_data
+
 
 class RedisPlugin(PorkchopPlugin):
-  def _connect(self, host, port):
-    try:
-      sock = socket.socket()
-      sock.connect((host, port))
-    except:
-      raise
-
-    return sock
 
   def get_data(self):
     data = self.gendict()
@@ -22,20 +15,19 @@ class RedisPlugin(PorkchopPlugin):
 
     for host, port in instances:
       try:
-        sock = self._connect(host, int(port))
-        sock.send('info\r\n')
+        with self.tcp_socket(host, int(port)) as sock:
+          sock.send('info\r\n')
 
-        # first line is the response length in bytes
-        resp_hdr = ''
-        sock.recv(1)
-        while not resp_hdr.endswith('\r\n'):
-          resp_hdr += sock.recv(1)
+          # first line is the response length in bytes
+          resp_hdr = ''
+          sock.recv(1)
+          while not resp_hdr.endswith('\r\n'):
+            resp_hdr += sock.recv(1)
 
-        resp_len = int(resp_hdr.strip())
+          resp_len = int(resp_hdr.strip())
+          resp_data = sock.recv(resp_len)
+          sock.send('quit\r\n')
 
-        resp_data = sock.recv(resp_len)
-        sock.send('quit\r\n')
-        sock.close()
       except (socket.error, ValueError):
         continue
 
@@ -57,3 +49,6 @@ class RedisPlugin(PorkchopPlugin):
           data[port][k] = v
 
     return data
+
+if __name__ == '__main__':
+  print test_plugin_data('redis')
